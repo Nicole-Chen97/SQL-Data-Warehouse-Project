@@ -1,27 +1,27 @@
 /*
 ===============================================================================
-Quality Checks
+Quality Checks - Silver Layer (PostgreSQL)
 ===============================================================================
 Script Purpose:
-    This script performs various quality checks for data consistency, accuracy, 
-    and standardization across the 'silver' layer. It includes checks for:
-    - Null or duplicate primary keys.
-    - Unwanted spaces in string fields.
-    - Data standardization and consistency.
-    - Invalid date ranges and orders.
-    - Data consistency between related fields.
+	This script validates the quality of data in the 'silver' schema after the
+    Bronze → Silver ETL is completed. The checks focus on ensuring Silver tables 
+	are analysis-ready by verifying:
+
+	- Key integrity: NULL or duplicate primary keys
+    - String hygiene: unwanted leading/trailing spaces in text columns
+    - Domain validity: unexpected category/flag values (via DISTINCT review)
+    - Date validity & logic: out-of-range dates and incorrect date ordering
+    - Numeric sanity: NULL/negative measures where not allowed
+    - Cross-field consistency: e.g., sales = quantity * price
+
 
 Usage Notes:
-    - Run these checks after data loading Silver Layer.
-    - Investigate and resolve any discrepancies found during the checks.
+    - Run these checks after data loading Silver Layer. Run after: CALL silver.load_silver(); 
+    - Any returned rows indicate records to investigate.
+    - Fix issues by adjusting Silver transformation logic (preferred), or by
+      addressing source anomalies when necessary.
 ===============================================================================
 */
-
--- ====================================================================
--- Checking 'silver.crm_cust_info'
--- ====================================================================
--- Check for NULLs or Duplicates in Primary Key
--- Expectation: No Results
 
 -- ============================================================================
 -- 1) silver.crm_cust_info
