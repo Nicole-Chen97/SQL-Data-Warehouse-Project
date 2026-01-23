@@ -50,7 +50,6 @@ FROM silver.crm_cust_info;
 -- ============================================================================
 -- 2.1 Key integrity: NULL or duplicate prd_id
 -- Expectation: 0 rows
-
 SELECT prd_id ,COUNT(*)
 FROM silver.crm_prd_info
 GROUP BY prd_id
@@ -87,7 +86,7 @@ WHERE prd_end_dt < prd_start_dt;
 -- ============================================================================
 -- 3.1 Grain-aware duplicate check (Needs confirmation!)
 -- If sls_ord_num is truly unique in your model, keep this.
--- Otherwise consider checking a composite key (e.g., sls_ord_num + prd_id).
+-- Otherwise consider checking a composite key .
 ---row count : duplicate -----
 SELECT sls_ord_num ,COUNT(*) AS cnt
 FROM silver.crm_sales_details
@@ -110,7 +109,7 @@ FROM silver.crm_sales_details
 WHERE sls_order_dt > sls_ship_dt 
   OR sls_order_dt > sls_due_dt
 
--- 3.4 Numeric validity (no NULL or non-positive for key measures)：Sales, Quantity, Price
+-- 3.4 Numeric validity (no NULL or non-positive for key measures)：Sales, Quantity, Price,Cost
 -- Expectation: 0 rows (unless returns/refunds exist and are represented differently)
 SELECT sls_sales , sls_quantity ,sls_price
 FROM silver.crm_sales_details
@@ -118,19 +117,18 @@ WHERE sls_sales != sls_quantity * sls_price
  OR sls_quantity IS NULL OR sls_quantity <= 0
  OR sls_price IS NULL OR sls_price <=0
  OR sls_sales IS NULL OR sls_sales <= 0 ;
- 
+
+SELECT  prd_cost
+FROM silver.crm_sales_details
+WHERE prd_cost <0 OR prd_cost IS NULL
+
+	
 -- 3.5 Cross-field consistency: sales = quantity * price
 -- Expectation: 0 rows (consider rounding rules if decimals exist)
 SELECT sls_ord_num, sls_sales, sls_quantity, sls_price
 FROM silver.crm_sales_details
 WHERE sls_sales <> sls_quantity * sls_price;
  
- 
--- Check for NULLs or Negative Values in Cost
-SELECT  prd_cost
-FROM silver.crm_sales_details
-WHERE prd_cost <0 OR prd_cost IS NULL
-
 
 
 -- ============================================================================
